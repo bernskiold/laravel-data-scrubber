@@ -17,7 +17,7 @@ use Traversable;
  *
  * @implements IteratorAggregate<string, ScrubStrategy|class-string<ScrubStrategy>|string>
  */
-final class ScrubbableFields implements IteratorAggregate, Countable
+final class ScrubbableFields implements Countable, IteratorAggregate
 {
     use Conditionable;
 
@@ -43,7 +43,7 @@ final class ScrubbableFields implements IteratorAggregate, Countable
      */
     public static function make(array $fields = []): static
     {
-        return new static($fields);
+        return new self($fields);
     }
 
     /**

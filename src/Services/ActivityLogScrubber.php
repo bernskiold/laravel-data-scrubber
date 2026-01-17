@@ -35,8 +35,9 @@ class ActivityLogScrubber
     /**
      * Scrub activity log records for the given model.
      *
-     * @param Model&Scrubbable $model
+     * @param  Model&Scrubbable  $model
      * @return int Number of activity records scrubbed
+     *
      * @throws StrategyException
      */
     public function scrub(Model $model): int
@@ -98,7 +99,6 @@ class ActivityLogScrubber
      * Scrub a single activity record.
      *
      * @param  Model  $activity  The activity record to scrub
-     * @param  ScrubbableFields  $scrubbableFields
      * @param  Model&Scrubbable  $model  The original model being scrubbed
      * @return bool Whether the activity was modified
      *
@@ -150,7 +150,6 @@ class ActivityLogScrubber
      * Scrub field values within a property data array.
      *
      * @param  array<string, mixed>  $data
-     * @param  ScrubbableFields  $scrubbableFields
      * @param  Model&Scrubbable  $model
      * @return array<string, mixed>
      *
@@ -173,7 +172,8 @@ class ActivityLogScrubber
     /**
      * Resolve a strategy instance from the configuration.
      *
-     * @param ScrubStrategy|class-string<ScrubStrategy> $config
+     * @param  ScrubStrategy|class-string<ScrubStrategy>  $config
+     *
      * @throws StrategyException
      */
     protected function resolveStrategyInstance(mixed $config): ScrubStrategy
