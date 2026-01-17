@@ -1,7 +1,7 @@
 # Laravel Data Scrubber
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/bernskiold/laravel-data-scrubber.svg?style=flat-square)](https://packagist.org/packages/bernskiold/laravel-data-scrubber)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/bernskiold/laravel-data-scrubber/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/bernskiold/laravel-data-scrubber/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/bernskiold/laravel-data-scrubber/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/bernskiold/laravel-data-scrubber/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/bernskiold/laravel-data-scrubber.svg?style=flat-square)](https://packagist.org/packages/bernskiold/laravel-data-scrubber)
 
 A Laravel package for scrubbing PII (Personally Identifiable Information) and sensitive data from Eloquent models.
