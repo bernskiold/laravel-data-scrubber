@@ -4,8 +4,8 @@ namespace Bernskiold\LaravelDataScrubber\Concerns;
 
 use Bernskiold\LaravelDataScrubber\Contracts\ScrubStrategy;
 use Bernskiold\LaravelDataScrubber\Data\ScrubbedField;
-use Bernskiold\LaravelDataScrubber\Events\Scrubbed;
 use Bernskiold\LaravelDataScrubber\Data\ScrubOptions;
+use Bernskiold\LaravelDataScrubber\Events\Scrubbed;
 use Bernskiold\LaravelDataScrubber\ScrubbingStrategies;
 use Illuminate\Database\Eloquent\Builder;
 
