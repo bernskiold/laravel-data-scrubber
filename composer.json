@@ -1,0 +1,67 @@
+{
+  "name": "bernskiold/laravel-data-scrubber",
+  "description": "A package for Laravel to clean or scrub data such as PII from models.",
+  "keywords": [
+    "bernskiold",
+    "laravel",
+    "data-scrubber",
+    "pii",
+    "personal data"
+  ],
+  "homepage": "https://github.com/bernskiold/laravel-data-scrubber",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Bernskiold",
+      "email": "hello@bernskiold.com",
+      "role": "Developer"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.2",
+    "illuminate/contracts": "^11.0|^12.0",
+    "laravel/prompts": "^0.1.18|^0.2.0|^0.3.0"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.0",
+    "nunomaduro/collision": "^8.0",
+    "orchestra/testbench": "^9.0",
+    "pestphp/pest": "^2.0|^3.0",
+    "pestphp/pest-plugin-laravel": "^2.0|^v3.0"
+  },
+  "suggest": {
+    "spatie/laravel-activitylog": "Required for automatic activity log scrubbing (^4.0)"
+  },
+  "autoload": {
+    "psr-4": {
+      "Bernskiold\\LaravelDataScrubber\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Bernskiold\\LaravelDataScrubber\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+          "DataScrubberServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage",
+    "format": "vendor/bin/pint"
+  }
+}
