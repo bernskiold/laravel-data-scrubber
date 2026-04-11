@@ -11,6 +11,7 @@ use Bernskiold\LaravelDataScrubber\Strategies\CallbackStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\HashStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\MaskStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\NullStrategy;
+use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel;
 
 beforeEach(function () {
     config(['data-scrubber.model_paths' => [__DIR__.'/../Fixtures']]);
@@ -53,10 +54,10 @@ describe('generate()', function () {
 describe('buildModelConfiguration()', function () {
     it('builds complete model configuration', function () {
         $service = app(ConfigurationReportService::class);
-        $config = $service->buildModelConfiguration(\Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel::class);
+        $config = $service->buildModelConfiguration(TestModel::class);
 
         expect($config)->toBeInstanceOf(ModelConfiguration::class);
-        expect($config->modelClass)->toBe(\Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel::class);
+        expect($config->modelClass)->toBe(TestModel::class);
         expect($config->shortName)->toBe('TestModel');
         expect($config->fields)->toHaveCount(6);
         expect($config->fieldNames())->toEqual(['email', 'first_name', 'last_name', 'phone', 'ssn', 'notes']);
@@ -64,7 +65,7 @@ describe('buildModelConfiguration()', function () {
 
     it('captures scrub options', function () {
         $service = app(ConfigurationReportService::class);
-        $config = $service->buildModelConfiguration(\Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel::class);
+        $config = $service->buildModelConfiguration(TestModel::class);
 
         expect($config->options->logTimestamp)->toBeTrue();
         expect($config->options->timestampColumn)->toBe('scrubbed_at');
@@ -73,7 +74,7 @@ describe('buildModelConfiguration()', function () {
 
     it('builds field configurations with strategy info', function () {
         $service = app(ConfigurationReportService::class);
-        $config = $service->buildModelConfiguration(\Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel::class);
+        $config = $service->buildModelConfiguration(TestModel::class);
 
         $emailField = $config->field('email');
 
@@ -251,14 +252,14 @@ describe('StrategyInfo DTO', function () {
 describe('ModelConfiguration DTO', function () {
     it('provides processing mode label', function () {
         $service = app(ConfigurationReportService::class);
-        $config = $service->buildModelConfiguration(\Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel::class);
+        $config = $service->buildModelConfiguration(TestModel::class);
 
         expect($config->processingMode())->toBeIn(['Async', 'Sync']);
     });
 
     it('provides unique strategy classes', function () {
         $service = app(ConfigurationReportService::class);
-        $config = $service->buildModelConfiguration(\Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel::class);
+        $config = $service->buildModelConfiguration(TestModel::class);
 
         $strategies = $config->uniqueStrategyClasses();
 
