@@ -91,7 +91,7 @@ it('resolves strategy from class-string', function () {
 });
 
 it('throws exception when resolving invalid class-string', function () {
-    expect(fn () => ScrubbingStrategies::resolve(\stdClass::class))
+    expect(fn () => ScrubbingStrategies::resolve(stdClass::class))
         ->toThrow(StrategyException::class, 'does not implement ScrubStrategy interface');
 });
 
