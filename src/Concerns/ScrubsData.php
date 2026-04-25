@@ -8,9 +8,10 @@ use Bernskiold\LaravelDataScrubber\Data\ScrubOptions;
 use Bernskiold\LaravelDataScrubber\Events\Scrubbed;
 use Bernskiold\LaravelDataScrubber\ScrubbingStrategies;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * @mixin \Illuminate\Database\Eloquent\Model
+ * @mixin Model
  */
 trait ScrubsData
 {

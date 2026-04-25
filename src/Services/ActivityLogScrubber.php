@@ -9,6 +9,7 @@ use Bernskiold\LaravelDataScrubber\Data\ScrubbableFields;
 use Bernskiold\LaravelDataScrubber\Exceptions\StrategyException;
 use Bernskiold\LaravelDataScrubber\ScrubbingStrategies;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class ActivityLogScrubber
 {
@@ -85,7 +86,7 @@ class ActivityLogScrubber
     /**
      * Get activity records for the given model.
      */
-    protected function getActivityRecords(Model $model): \Illuminate\Support\Collection
+    protected function getActivityRecords(Model $model): Collection
     {
         $activityClass = $this->activityModel;
 
@@ -114,7 +115,7 @@ class ActivityLogScrubber
         }
 
         // Convert to array if it's a Collection
-        $propertiesArray = $properties instanceof \Illuminate\Support\Collection
+        $propertiesArray = $properties instanceof Collection
             ? $properties->toArray()
             : (array) $properties;
 
