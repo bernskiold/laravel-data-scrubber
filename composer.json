@@ -54,7 +54,7 @@
   "extra": {
     "laravel": {
       "providers": [
-          "DataScrubberServiceProvider"
+          "Bernskiold\\LaravelDataScrubber\\DataScrubberServiceProvider"
       ]
     }
   },
