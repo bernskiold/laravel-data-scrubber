@@ -19,7 +19,6 @@ use Bernskiold\LaravelDataScrubber\Strategies\MaskStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\NullStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\RedactedStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\TruncateStrategy;
-use Composer\InstalledVersions;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
@@ -31,7 +30,7 @@ class DataScrubberServiceProvider extends ServiceProvider
         $this->registerDefaultStrategies();
         $this->registerBlueprintMacros();
 
-        AboutCommand::add('Laravel Data Scrubber', fn () => ['Version' => $this->packageVersion()]);
+        AboutCommand::add('Laravel Data Scrubber', fn () => ['Version' => '1.0.0']);
 
         $this->publishes([
             __DIR__.'/../config/data-scrubber.php' => config_path('data-scrubber.php'),
@@ -75,19 +74,6 @@ class DataScrubberServiceProvider extends ServiceProvider
             ConditionalStrategy::class,
             CallbackStrategy::class,
         ]);
-    }
-
-    /**
-     * Resolve the installed package version for the about command.
-     */
-    protected function packageVersion(): string
-    {
-        if (class_exists(InstalledVersions::class) &&
-            InstalledVersions::isInstalled('bernskiold/laravel-data-scrubber')) {
-            return InstalledVersions::getPrettyVersion('bernskiold/laravel-data-scrubber') ?? 'dev';
-        }
-
-        return 'dev';
     }
 
     /**
