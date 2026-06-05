@@ -192,6 +192,43 @@ it('applies delete file strategy handles null value', function () {
     expect($result)->toBeNull();
 });
 
+it('previews delete file strategy without deleting the file', function () {
+    Storage::fake('local');
+    Storage::put('test-file.txt', 'content');
+
+    $strategy = new DeleteFileStrategy;
+    $model = new TestModel(['id' => 1]);
+    $model->id = 1;
+
+    $result = $strategy->preview('test-file.txt', $model, 'file_path');
+
+    expect($result)->toBeNull();
+    Storage::assertExists('test-file.txt');
+});
+
+it('applies hash strategy with salt using hmac', function () {
+    $strategy = new HashStrategy(salt: 'my-secret-salt');
+    $model = new TestModel(['id' => 1]);
+    $model->id = 1;
+
+    $result = $strategy->apply('sensitive data', $model, 'field');
+
+    expect($result)->toBe(hash_hmac('sha256', 'sensitive data', 'my-secret-salt'));
+    expect($result)->not->toBe(hash('sha256', 'sensitive data'));
+});
+
+it('applies hash strategy with salt from config', function () {
+    config(['data-scrubber.strategies.hash.salt' => 'config-salt']);
+
+    $strategy = new HashStrategy;
+    $model = new TestModel(['id' => 1]);
+    $model->id = 1;
+
+    $result = $strategy->apply('sensitive data', $model, 'field');
+
+    expect($result)->toBe(hash_hmac('sha256', 'sensitive data', 'config-salt'));
+});
+
 it('applies callback strategy', function () {
     $strategy = new CallbackStrategy(fn ($value, $model, $field) => "custom-{$model->id}-{$field}");
     $model = new TestModel(['id' => 42]);

@@ -2,12 +2,13 @@
 
 namespace Bernskiold\LaravelDataScrubber\Strategies;
 
+use Bernskiold\LaravelDataScrubber\Contracts\PreviewableStrategy;
 use Bernskiold\LaravelDataScrubber\Contracts\ScrubStrategy;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-class DeleteFileStrategy implements ScrubStrategy
+class DeleteFileStrategy implements PreviewableStrategy, ScrubStrategy
 {
     protected ?string $disk;
 
@@ -25,6 +26,14 @@ class DeleteFileStrategy implements ScrubStrategy
             $this->getStorage()->delete($value);
         }
 
+        return null;
+    }
+
+    /**
+     * Preview the scrubbed value without deleting the file from storage.
+     */
+    public function preview(mixed $value, Model $model, string $field): mixed
+    {
         return null;
     }
 

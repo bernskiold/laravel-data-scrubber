@@ -2,6 +2,7 @@
 
 use Bernskiold\LaravelDataScrubber\Jobs\ScrubModelJob;
 use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel;
+use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModelUnfilteredQuery;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
@@ -98,6 +99,48 @@ it('uses configured chunk size', function () {
     // All records should be scrubbed despite chunking
     $scrubbed = TestModel::onlyTrashed()->whereNotNull('scrubbed_at')->count();
     expect($scrubbed)->toBe(5);
+});
+
+it('chains additional jobs across multiple chunks', function () {
+    for ($i = 0; $i < 5; $i++) {
+        $model = TestModel::create([
+            'email' => "user{$i}@example.com",
+            'first_name' => "User{$i}",
+            'last_name' => 'Test',
+        ]);
+        $model->delete();
+    }
+
+    config(['data-scrubber.queue.chunk_size' => 2]);
+
+    // A single dispatched job should chain through every chunk (sync queue).
+    ScrubModelJob::dispatch(TestModel::class);
+
+    $scrubbed = TestModel::onlyTrashed()->whereNotNull('scrubbed_at')->count();
+    expect($scrubbed)->toBe(5);
+});
+
+it('does not re-scrub already scrubbed records on a second run', function () {
+    $model = TestModelUnfilteredQuery::create([
+        'email' => 'john@example.com',
+        'notes' => 'private information',
+    ]);
+    $model->delete();
+
+    // First run hashes the notes once.
+    (new ScrubModelJob(TestModelUnfilteredQuery::class))->handle();
+    $model->refresh();
+
+    $hashedOnce = hash('sha256', 'private information');
+    expect($model->notes)->toBe($hashedOnce);
+
+    // Second run must skip the already-scrubbed record (scrubbableQuery does not
+    // filter scrubbed rows, so this exercises the pendingScrubbableQuery net).
+    (new ScrubModelJob(TestModelUnfilteredQuery::class))->handle();
+    $model->refresh();
+
+    // The value is still the single hash, not a hash-of-a-hash.
+    expect($model->notes)->toBe($hashedOnce);
 });
 
 it('can be dispatched to queue', function () {

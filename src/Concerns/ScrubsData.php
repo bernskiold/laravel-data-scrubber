@@ -2,6 +2,7 @@
 
 namespace Bernskiold\LaravelDataScrubber\Concerns;
 
+use Bernskiold\LaravelDataScrubber\Contracts\PreviewableStrategy;
 use Bernskiold\LaravelDataScrubber\Contracts\ScrubStrategy;
 use Bernskiold\LaravelDataScrubber\Data\ScrubbedField;
 use Bernskiold\LaravelDataScrubber\Data\ScrubOptions;
@@ -70,6 +71,20 @@ trait ScrubsData
     }
 
     /**
+     * Get the query of records that still need scrubbing.
+     *
+     * Wraps the model-defined scrubbableQuery() with the notScrubbed scope so
+     * that already-scrubbed records are never processed twice. This guards
+     * against non-idempotent strategies (e.g. hashing) corrupting data on job
+     * retries or repeated runs. When timestamp logging is disabled the scope is
+     * a no-op and the original query is returned unchanged.
+     */
+    public function pendingScrubbableQuery(): Builder
+    {
+        return $this->scrubbableQuery()->notScrubbed();
+    }
+
+    /**
      * Check if this record has already been scrubbed.
      *
      * Only works when timestamp logging is enabled.
@@ -101,16 +116,27 @@ trait ScrubsData
 
             $preview[$field] = [
                 'current' => $this->{$field},
-                'scrubbed' => $strategy->apply(
-                    $this->{$field},
-                    $this,
-                    $field
-                ),
+                'scrubbed' => $this->previewStrategyValue($strategy, $this->{$field}, $field),
                 'strategy' => $strategy::class,
             ];
         }
 
         return $preview;
+    }
+
+    /**
+     * Compute a strategy's scrubbed value without triggering side effects.
+     *
+     * Strategies that perform side effects (e.g. deleting files) implement
+     * PreviewableStrategy so previews can be generated safely.
+     */
+    protected function previewStrategyValue(ScrubStrategy $strategy, mixed $value, string $field): mixed
+    {
+        if ($strategy instanceof PreviewableStrategy) {
+            return $strategy->preview($value, $this, $field);
+        }
+
+        return $strategy->apply($value, $this, $field);
     }
 
     /**

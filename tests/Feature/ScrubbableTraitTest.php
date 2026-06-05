@@ -2,8 +2,10 @@
 
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeEmailWithIdStrategy;
 use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModel;
+use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModelWithClassStrategies;
 use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModelWithCustomStrategy;
 use Bernskiold\LaravelDataScrubber\Tests\Fixtures\TestModelWithoutTimestamp;
+use Illuminate\Support\Facades\Storage;
 
 it('scrubs model data with timestamp logging', function () {
     $model = TestModel::create([
@@ -105,6 +107,46 @@ it('previews scrub without saving', function () {
     // Verify original data is unchanged
     $model->refresh();
     expect($model->email)->toBe('john@example.com');
+});
+
+it('previews scrub without triggering file deletion side effects', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('avatars/photo.jpg', 'content');
+
+    $model = TestModelWithClassStrategies::create([
+        'email' => 'john@example.com',
+        'avatar' => 'avatars/photo.jpg',
+    ]);
+
+    $preview = $model->previewScrub();
+
+    // The previewed value matches what scrubbing would produce...
+    expect($preview['avatar']['scrubbed'])->toBeNull();
+
+    // ...but the file is NOT deleted during a preview.
+    Storage::disk('public')->assertExists('avatars/photo.jpg');
+});
+
+it('pendingScrubbableQuery excludes already scrubbed records', function () {
+    $scrubbed = TestModel::create([
+        'email' => 'scrubbed@example.com',
+        'first_name' => 'Deleted',
+        'last_name' => 'User',
+        'scrubbed_at' => now(),
+    ]);
+    $scrubbed->delete();
+
+    $pending = TestModel::create([
+        'email' => 'pending@example.com',
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+    ]);
+    $pending->delete();
+
+    $results = (new TestModel)->pendingScrubbableQuery()->get();
+
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($pending->id);
 });
 
 it('scopes to not scrubbed records', function () {

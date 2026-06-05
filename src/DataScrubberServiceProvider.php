@@ -9,14 +9,17 @@ use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeEmailStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeEmailWithIdStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeFirstNameStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeLastNameStrategy;
+use Bernskiold\LaravelDataScrubber\Strategies\CallbackStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\ConditionalStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\DeleteFileStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\HashStrategy;
+use Bernskiold\LaravelDataScrubber\Strategies\IpAnonymizeStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\JsonFieldStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\MaskStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\NullStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\RedactedStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\TruncateStrategy;
+use Composer\InstalledVersions;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
@@ -28,7 +31,7 @@ class DataScrubberServiceProvider extends ServiceProvider
         $this->registerDefaultStrategies();
         $this->registerBlueprintMacros();
 
-        AboutCommand::add('Laravel Data Scrubber', fn () => ['Version' => '1.0.0']);
+        AboutCommand::add('Laravel Data Scrubber', fn () => ['Version' => $this->packageVersion()]);
 
         $this->publishes([
             __DIR__.'/../config/data-scrubber.php' => config_path('data-scrubber.php'),
@@ -67,9 +70,24 @@ class DataScrubberServiceProvider extends ServiceProvider
             DeleteFileStrategy::class,
             MaskStrategy::class,
             TruncateStrategy::class,
+            IpAnonymizeStrategy::class,
             JsonFieldStrategy::class,
             ConditionalStrategy::class,
+            CallbackStrategy::class,
         ]);
+    }
+
+    /**
+     * Resolve the installed package version for the about command.
+     */
+    protected function packageVersion(): string
+    {
+        if (class_exists(InstalledVersions::class) &&
+            InstalledVersions::isInstalled('bernskiold/laravel-data-scrubber')) {
+            return InstalledVersions::getPrettyVersion('bernskiold/laravel-data-scrubber') ?? 'dev';
+        }
+
+        return 'dev';
     }
 
     /**

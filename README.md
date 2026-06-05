@@ -106,13 +106,16 @@ class User extends Model implements Scrubbable
 | `AnonymizeLastNameStrategy`    | Replaces with "User"                             | `User`                                |
 | `AnonymizeEmailStrategy`       | Replaces with a generic email                    | `anonymized@deleted.local`            |
 | `AnonymizeEmailWithIdStrategy` | Replaces with email containing model ID          | `deleted-123@anonymized.local`        |
-| `HashStrategy`                 | Hashes the value using SHA-256                   | `a8f5f167f44f4964e6c998dee827110c...` |
+| `HashStrategy`                 | Hashes the value (SHA-256 by default, salted)    | `a8f5f167f44f4964e6c998dee827110c...` |
 | `DeleteFileStrategy`           | Deletes file from storage and sets to `null`     | `null`                                |
 | `MaskStrategy`                 | Masks middle characters, showing start and end   | `12******90`                          |
 | `TruncateStrategy`             | Keeps first N characters and adds suffix         | `Jon***`                              |
+| `IpAnonymizeStrategy`          | Zeros out trailing IPv4/IPv6 octets (GDPR)       | `192.168.0.0`                         |
 | `JsonFieldStrategy`            | Scrubs specific keys in JSON/array data          | (varies per key)                      |
 | `ConditionalStrategy`          | Applies different strategies based on conditions | (depends on condition)                |
 | `CallbackStrategy`             | Uses a custom closure handler                    | (depends on handler)                  |
+
+> **Hashing note:** An unsalted hash of low-cardinality data (emails, phone numbers) can be reversed with brute-force or rainbow tables. Set a secret in `data-scrubber.strategies.hash.salt` (e.g. `env('DATA_SCRUBBER_HASH_SALT')`) to switch `HashStrategy` to HMAC and make the result non-reversible. Note that changing the algorithm or salt changes the output, so apply it before scrubbing.
 
 ### Using Strategy Classes Directly
 
@@ -328,10 +331,11 @@ return [
         'anonymize_last_name' => ['replacement' => 'User'],
         'anonymize_email' => ['replacement' => 'anonymized@deleted.local'],
         'anonymize_email_with_id' => ['domain' => 'anonymized.local', 'prefix' => 'deleted-'],
-        'hash' => ['algorithm' => 'sha256'],
+        'hash' => ['algorithm' => 'sha256', 'salt' => env('DATA_SCRUBBER_HASH_SALT')],
         'delete_file' => ['disk' => null],
         'mask' => ['visible_start' => 2, 'visible_end' => 2, 'mask_char' => '*'],
         'truncate' => ['keep_chars' => 3, 'suffix' => '***'],
+        'ip_anonymize' => ['mask_octets' => 2],
     ],
 
     // Queue configuration for async processing
@@ -345,6 +349,14 @@ return [
     ],
 ];
 ```
+
+> **Publishing a partial config:** Laravel merges a published config with the package defaults at the top level only. If you publish `config/data-scrubber.php` and keep only some keys under a nested array (such as `strategies` or `queue`), the unspecified sub-keys fall back to their hard-coded strategy defaults rather than being merged. Keep the full nested arrays in your published file to avoid surprises.
+
+#### How records are processed
+
+When scrubbing asynchronously, each queued job scrubs a single chunk (`chunk_size`) of records and, if more remain, dispatches a follow-up job for the next chunk. This keeps individual jobs small on large tables and makes retries safe — a failed job only re-processes its own chunk.
+
+The command and jobs only ever operate on records returned by your `scrubbableQuery()`, further narrowed to those that have **not** already been scrubbed (when timestamp logging is enabled). This guards non-idempotent strategies such as `HashStrategy` against being applied twice on retries or repeated runs.
 
 You can override options on a per-model basis by implementing `getScrubOptions()` in your model:
 

@@ -90,7 +90,7 @@ class ScrubDataCommand extends Command
         foreach ($models as $modelClass) {
             /** @var Model&Scrubbable $instance */
             $instance = new $modelClass;
-            $count = $instance->scrubbableQuery()->count();
+            $count = $instance->pendingScrubbableQuery()->count();
             $fields = implode(', ', $instance->scrubbableFields()->fields());
 
             $tableData[] = [
@@ -122,7 +122,7 @@ class ScrubDataCommand extends Command
             foreach ($models as $modelClass) {
                 /** @var Model&Scrubbable $instance */
                 $instance = new $modelClass;
-                $count = $instance->scrubbableQuery()->count();
+                $count = $instance->pendingScrubbableQuery()->count();
                 $options = $instance->getScrubOptions();
                 $chunkSize = $options->chunkSize;
                 $async = $options->scrubAsync;
@@ -145,7 +145,7 @@ class ScrubDataCommand extends Command
 
             /** @var Model&Scrubbable $instance */
             $instance = new $modelClass;
-            $records = $instance->scrubbableQuery()->limit(3)->get();
+            $records = $instance->pendingScrubbableQuery()->limit(3)->get();
 
             if ($records->isEmpty()) {
                 warning('  No records to scrub.');
@@ -164,7 +164,7 @@ class ScrubDataCommand extends Command
                 }
             }
 
-            $total = $instance->scrubbableQuery()->count();
+            $total = $instance->pendingScrubbableQuery()->count();
             if ($total > 3) {
                 info('  ... and '.($total - 3).' more record(s).');
             }
@@ -188,7 +188,7 @@ class ScrubDataCommand extends Command
         foreach ($models as $modelClass) {
             /** @var Model&Scrubbable $instance */
             $instance = new $modelClass;
-            $count = $instance->scrubbableQuery()->count();
+            $count = $instance->pendingScrubbableQuery()->count();
 
             if ($count === 0) {
                 info('No records to scrub for '.class_basename($modelClass).'.');
@@ -257,7 +257,7 @@ class ScrubDataCommand extends Command
 
         $progress->start();
 
-        $instance->scrubbableQuery()
+        $instance->pendingScrubbableQuery()
             ->chunkById($chunkSize, function ($records) use ($progress, &$scrubbed, &$errors) {
                 foreach ($records as $record) {
                     /** @var Model&Scrubbable $record */
