@@ -17,6 +17,14 @@ interface Scrubbable
     public function scrubbableQuery(): Builder;
 
     /**
+     * Get the query of records that still need scrubbing.
+     *
+     * Wraps scrubbableQuery() with the notScrubbed scope so already-scrubbed
+     * records are never processed twice. Provided by the ScrubsData trait.
+     */
+    public function pendingScrubbableQuery(): Builder;
+
+    /**
      * Get the fields and their scrubbing strategies.
      *
      * Returns a ScrubbableFields object containing field names and their strategies.

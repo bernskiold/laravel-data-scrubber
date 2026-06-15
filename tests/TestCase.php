@@ -63,6 +63,15 @@ class TestCase extends Orchestra
             $table->timestamps();
         });
 
+        Schema::create('test_models_unfiltered', function (Blueprint $table) {
+            $table->id();
+            $table->string('email')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamp('scrubbed_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         Schema::create('test_models_class_strategies', function (Blueprint $table) {
             $table->id();
             $table->string('email')->nullable();

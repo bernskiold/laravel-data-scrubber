@@ -24,8 +24,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | This is the default column name used to store when a record was scrubbed.
-    | You can override this on a per-model basis by implementing the
-    | scrubTimestampColumn() method in your model.
+    | You can override this on a per-model basis by returning a customized
+    | ScrubOptions from getScrubOptions() and calling useTimestampColumn().
     |
     */
 
@@ -67,6 +67,12 @@ return [
 
         'hash' => [
             'algorithm' => 'sha256',
+
+            // Optional secret used to HMAC the value. Strongly recommended for
+            // low-cardinality PII (emails, phone numbers) which an unsalted hash
+            // leaves recoverable via brute-force/rainbow tables. Leave null for a
+            // plain hash. Example: env('DATA_SCRUBBER_HASH_SALT').
+            'salt' => null,
         ],
 
         'delete_file' => [
@@ -102,7 +108,8 @@ return [
     */
 
     'queue' => [
-        // Enable async processing by default (models can override via shouldScrubAsynchronously)
+        // Enable async processing by default. Models can override per-model via
+        // getScrubOptions()->scrubSynchronously() / scrubAsynchronously().
         'async' => env('DATA_SCRUBBER_ASYNC', true),
 
         // Queue connection (null = default connection)
@@ -111,7 +118,8 @@ return [
         // Queue name for scrub jobs
         'queue' => 'data-scrubber',
 
-        // Default chunk size for chunkById (models can override via scrubChunkSize)
+        // Default number of records scrubbed per job/chunk. Models can override
+        // per-model via getScrubOptions()->useChunkSize().
         'chunk_size' => 500,
 
         // Job retry attempts

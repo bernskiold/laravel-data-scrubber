@@ -9,9 +9,11 @@ use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeEmailStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeEmailWithIdStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeFirstNameStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\AnonymizeLastNameStrategy;
+use Bernskiold\LaravelDataScrubber\Strategies\CallbackStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\ConditionalStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\DeleteFileStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\HashStrategy;
+use Bernskiold\LaravelDataScrubber\Strategies\IpAnonymizeStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\JsonFieldStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\MaskStrategy;
 use Bernskiold\LaravelDataScrubber\Strategies\NullStrategy;
@@ -67,8 +69,10 @@ class DataScrubberServiceProvider extends ServiceProvider
             DeleteFileStrategy::class,
             MaskStrategy::class,
             TruncateStrategy::class,
+            IpAnonymizeStrategy::class,
             JsonFieldStrategy::class,
             ConditionalStrategy::class,
+            CallbackStrategy::class,
         ]);
     }
 
