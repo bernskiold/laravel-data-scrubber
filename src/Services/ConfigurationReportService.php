@@ -111,7 +111,6 @@ class ConfigurationReportService
                 continue;
             }
 
-            $property->setAccessible(true);
             $value = $property->getValue($strategy);
 
             // Handle special types
